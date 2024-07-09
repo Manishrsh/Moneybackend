@@ -6,7 +6,7 @@ const Expence = require('./model/expencemodel');
 const AddMoney = require('./model/addmoney');
 
 app.use(cors({
-  origin: 'https://money-front-omega.vercel.app' // Correct origin
+  origin: 'https://money-front-five.vercel.app' // Correct origin
 }));
 
 const dbURI = 'mongodb+srv://manishrs5235:z1vJjUxF4pOVBcIa@cluster0.mjowunr.mongodb.net/mydatabase?retryWrites=true&w=majority&appName=Cluster0';
