@@ -31,10 +31,10 @@ jobs:
         chmod 600 private_key.pem
         # Install rsync
         sudo apt-get update && sudo apt-get install -y rsync
-        # Ensure the target directory exists on the EC2 instance
+        # Use SSH to create the directory with sudo
         ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST << 'ENDSSH'
-          mkdir -p /var/www/html
-          # You may need to set permissions for the directory if required
+          sudo mkdir -p /var/www/html
+          sudo chown -R $EC2_USER:$EC2_USER /var/www/html
         ENDSSH
         # Use rsync to copy project files to EC2 instance
         rsync -avz --exclude='.git' --exclude='node_modules' -e "ssh -o StrictHostKeyChecking=no -i private_key.pem" ./ $EC2_USER@$EC2_HOST:/var/www/html
