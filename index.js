@@ -63,7 +63,7 @@ app.post('/addmoney', async (req, res) => {
 
   const moneyAddData = new AddMoney({
     amount,
-    though,
+    though, 
     createdAt:createdAts
   });
 
