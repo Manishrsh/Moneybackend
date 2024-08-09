@@ -29,8 +29,10 @@ jobs:
       run: |
         echo "$SSH_PRIVATE_KEY" > private_key.pem
         chmod 600 private_key.pem
-        # Copy project files to EC2 instance
-        scp -o StrictHostKeyChecking=no -i private_key.pem -r . $EC2_USER@$EC2_HOST:/var/www/html
+        # Install rsync
+        sudo apt-get update && sudo apt-get install -y rsync
+        # Use rsync to copy project files to EC2 instance
+        rsync -avz --exclude='.git' --exclude='node_modules' -e "ssh -o StrictHostKeyChecking=no -i private_key.pem" ./ $EC2_USER@$EC2_HOST:/var/www/html
         # SSH into the EC2 instance and perform post-deployment tasks
         ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST << 'ENDSSH'
           cd /var/www/html
