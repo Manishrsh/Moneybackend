@@ -6,10 +6,10 @@ const Expence = require('./model/expencemodel');
 const AddMoney = require('./model/addmoney');
 
 app.use(cors({
-  origin: 'http://localhost:5173' // Correct origin
+  origin: 'https://money-front-one.vercel.app' // Correct origin
 }));
 
-const dbURI = 'mongodb://localhost:27017/moneymangment';
+const dbURI = 'mongodb+srv://manishrs5235:z1vJjUxF4pOVBcIa@cluster0.mjowunr.mongodb.net/mydatabase?retryWrites=true&w=majority&appName=Cluster0';
 
 mongoose.connect(dbURI, {
   useNewUrlParser: true,
