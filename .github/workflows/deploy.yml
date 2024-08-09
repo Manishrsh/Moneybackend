@@ -6,14 +6,14 @@ on:
       - main
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Set up Node.js (example for a Node.js project)
+    - name: Set up Node.js (if needed)
       uses: actions/setup-node@v3
       with:
         node-version: '14'
@@ -21,19 +21,17 @@ jobs:
     - name: Install dependencies
       run: npm install
 
-    - name: Build the project
-      run: npm run build
-
     - name: Deploy to EC2
       env:
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         EC2_HOST: ${{ secrets.EC2_HOST }}
         EC2_USER: ${{ secrets.EC2_USER }}
-        EC2_KEY_PATH: ${{ secrets.EC2_KEY_PATH }}
       run: |
         echo "$SSH_PRIVATE_KEY" > private_key.pem
         chmod 600 private_key.pem
-        scp -o StrictHostKeyChecking=no -i private_key.pem -r ./build $EC2_USER@$EC2_HOST:/var/www/html
+        # Copy project files to EC2 instance
+        scp -o StrictHostKeyChecking=no -i private_key.pem -r . $EC2_USER@$EC2_HOST:/var/www/html
+        # SSH into the EC2 instance and perform post-deployment tasks
         ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST << 'ENDSSH'
           cd /var/www/html
           # Run any necessary post-deployment commands here

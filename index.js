@@ -25,7 +25,7 @@ app.get('/', (req, res) => {
 });
 
 // Date formatting function
-const formatDate = (date) => {
+const formatDate = () => {
     const today = new Date();
     const yyyy = today.getFullYear();
     let mm = today.getMonth() + 1; // Months start at 0!
@@ -52,6 +52,7 @@ app.post('/expence', async (req, res) => {
     await expenceData.save();
     res.status(201).send('Expence saved successfully');
   } catch (err) {
+    console.error('Error adding money:', err);
     res.status(500).send('Error saving expence');
   }
 });
@@ -70,6 +71,7 @@ app.post('/addmoney', async (req, res) => {
     await moneyAddData.save();
     res.status(201).send('Money added successfully');
   } catch (err) {
+    console.error('Error adding money:', err);
     res.status(500).send('Error adding money');
   }
 });
