@@ -86,4 +86,10 @@ jobs:
           include /etc/letsencrypt/options-ssl-nginx.conf; ssl dhparam /etc/letsencrypt/ssl-dhparams.pem; #
           # managed by Certbot managed by Certbot
           }
-          
+          EOL
+
+          # Test Nginx configuration
+          sudo nginx -t
+
+          # Restart Nginx to apply the new configuration
+          sudo systemctl restart nginx
