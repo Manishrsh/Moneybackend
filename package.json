@@ -7,7 +7,8 @@
     "lint": "eslint .",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "npm run lint && npm run compile",
-    "compile": "babel . -d dist"
+    "compile": "babel . -d dist",
+    "start-user-app": "cd ./apps/user-app && npm run start"
   },
   "author": "",
   "license": "ISC",
