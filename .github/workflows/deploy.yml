@@ -1,5 +1,6 @@
-name: Deploy to EC2
+name: Push-to-EC2
 
+# Trigger deployment only on push to main branch
 on:
   push:
     branches:
@@ -7,39 +8,31 @@ on:
 
 jobs:
   deploy:
+    name: Deploy to EC2 on master branch push
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout the files
+        uses: actions/checkout@v2
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '14'
+      - name: Deploy to Server 1
+        uses: easingthemes/ssh-deploy@main
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+          REMOTE_HOST: ${{ secrets.HOST_DNS }}
+          REMOTE_USER: ${{ secrets.USERNAME }}
+          TARGET: ${{ secrets.TARGET_DIR }}
 
-    - name: Install dependencies
-      run: npm install
-
-    - name: Deploy to EC2
-      env:
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        EC2_HOST: ${{ secrets.EC2_HOST }}
-        EC2_USER: ${{ secrets.EC2_USER }}
-      run: |
-        echo "$SSH_PRIVATE_KEY" > private_key.pem
-        chmod 600 private_key.pem
-        # Ensure the target directory exists on the EC2 instance
-        ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST << 'ENDSSH'
-          sudo mkdir -p /var/www/html
-          sudo chown -R $EC2_USER:$EC2_USER /var/www/html
-        ENDSSH
-        # Use rsync to copy project files to EC2 instance with verbose output
-        rsync -avzh --exclude='.git' --exclude='node_modules' --ignore-errors --progress -e "ssh -o StrictHostKeyChecking=no -i private_key.pem" ./ $EC2_USER@$EC2_HOST:/var/www/html
-        # SSH into the EC2 instance and perform post-deployment tasks
-        ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST << 'ENDSSH'
-          cd /var/www/html
-          # Run any necessary post-deployment commands here
-          # For example, restarting a service or installing dependencies
-        ENDSSH
-        rm private_key.pem
+      - name: Executing remote ssh commands using ssh key
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST_DNS }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            sudo apt-get -y update
+            sudo apt-get install -y apache2
+            sudo systemctl start apache2
+            sudo systemctl enable apache2
+            cd home
+            sudo mv * /var/www/html
