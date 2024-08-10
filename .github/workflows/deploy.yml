@@ -38,5 +38,7 @@ jobs:
             sudo systemctl enable apache2
             # Navigate to the uploaded directory
             cd ${{ secrets.TARGET_DIR }}
+            # List files to confirm they are present
+            ls -la
             # Move all files from the target directory to /var/www/html
             sudo mv ./* /var/www/html
