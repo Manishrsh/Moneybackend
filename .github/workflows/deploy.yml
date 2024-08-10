@@ -28,3 +28,15 @@ jobs:
 
     - name: Verify Pushed Image
       run: docker pull techmanish2004/cicdwork:latest  # Replace with your Docker Hub username and repository
+
+    - name: Deploy to EC2
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        script: |
+          sudo docker pull techmanish2004/cicdwork:latest
+          sudo docker stop cicdwork || true
+          sudo docker rm cicdwork || true
+          sudo docker run -d --name web-app -p 3005:4000 techmanish2004/cicdwork:latest
