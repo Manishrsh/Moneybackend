@@ -21,7 +21,7 @@ mongoose.connect(dbURI, {
 app.use(express.json());
 
 app.get('/', (req, res) => {
-  res.send("hello Money World cicd nginx ok or not o");
+  res.send("hello Money World cicd nginx ok or not o scecond ec2");
 });
 
 // Date formatting function
