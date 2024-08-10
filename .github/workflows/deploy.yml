@@ -24,73 +24,19 @@ jobs:
         context: .
         file: ./dockerfile
         push: true
-        tags: techmanish2004/cicdwork:latest
+        tags: techmanish2004/cicdwork:latest  # Replace with your Docker Hub username and repository
 
     - name: Verify Pushed Image
-      run: docker pull techmanish2004/cicdwork:latest
+      run: docker pull techmanish2004/cicdwork:latest  # Replace with your Docker Hub username and repository
 
-    - name: Deploy to EC2 and Configure Nginx
+    - name: Deploy to EC2
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.EC2_HOST }}
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_SSH_KEY }}
         script: |
-          # Pull the latest Docker image
           sudo docker pull techmanish2004/cicdwork:latest
-          
-          # Stop and remove the existing container
-          sudo docker stop web-app || true
-          sudo docker rm web-app || true
-          
-          # Run the new container
+          sudo docker stop cicdwork || true
+          sudo docker rm cicdwork || true
           sudo docker run -d --name web-app -p 3005:4000 techmanish2004/cicdwork:latest
-
-          # Install Nginx if not already installed
-          if ! command -v nginx &> /dev/null
-          then
-            sudo apt update
-            sudo apt install -y nginx
-          fi
-
-          # Create or update the Nginx configuration
-          sudo tee /etc/nginx/sites-available/default > /dev/null <<EOL
-          server {
-              listen 80;
-              server_name money-front-one.vercel.app;
-
-              location / {
-                  proxy_pass http://localhost:3005;
-                  proxy_http_version 1.1;
-                  proxy_set_header Upgrade \$http_upgrade;
-                  proxy_set_header Connection 'upgrade';
-                  proxy_set_header Host \$host;
-                  proxy_cache_bypass \$http_upgrade;
-              }
-          }
-
-          server {
-              listen 443 ssl; # managed by Certbot
-              server_name money-front-one.vercel.app;
-
-              ssl_certificate /etc/letsencrypt/live/money-front-one.vercel.app/fullchain.pem; # managed by Certbot
-              ssl_certificate_key /etc/letsencrypt/live/money-front-one.vercel.app/privkey.pem; # managed by Certbot
-              include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
-              ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
-
-              location / {
-                  proxy_pass http://localhost:3005;
-                  proxy_http_version 1.1;
-                  proxy_set_header Upgrade \$http_upgrade;
-                  proxy_set_header Connection 'upgrade';
-                  proxy_set_header Host \$host;
-                  proxy_cache_bypass \$http_upgrade;
-              }
-          }
-          EOL
-
-          # Test Nginx configuration
-          sudo nginx -t
-
-          # Restart Nginx to apply the new configuration
-          sudo systemctl restart nginx
