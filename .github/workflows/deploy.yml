@@ -24,12 +24,12 @@ jobs:
         context: .
         file: ./dockerfile
         push: true
-        tags: techmanish2004/cicdwork:latest
+        tags: techmanish2004/cicdwork:latest  # Replace with your Docker Hub username and repository
 
     - name: Verify Pushed Image
-      run: docker pull techmanish2004/cicdwork:latest
+      run: docker pull techmanish2004/cicdwork:latest  # Replace with your Docker Hub username and repository
 
-    - name: Deploy to EC2
+    - name: Deploy to EC2 and Configure Nginx
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.EC2_HOST }}
@@ -44,15 +44,7 @@ jobs:
           # Run the new container
           sudo docker run -d --name web-app -p 3005:4000 techmanish2004/cicdwork:latest
 
-          # Install Nginx if not already installed
-          if ! command -v nginx &> /dev/null
-          then
-            sudo apt update
-            sudo apt install -y nginx
-          fi
-
-          # Create or update the Nginx configuration
-          sudo tee /etc/nginx/sites-available/default > /dev/null <<EOL
+          
           server {
               listen 80;
               server_name money-front-one.vercel.app;
@@ -72,8 +64,17 @@ jobs:
           }
           EOL
 
-          # Test Nginx configuration
-          sudo nginx -t
-
           # Restart Nginx to apply the new configuration
           sudo systemctl restart nginx
+
+          # Obtain SSL certificates using Certbot (Let's Encrypt)
+          if ! command -v certbot &> /dev/null
+          then
+            sudo apt install -y certbot python3-certbot-nginx
+          fi
+
+          # Configure SSL with Certbot
+          sudo certbot --nginx -d money-front-one.vercel.app --non-interactive --agree-tos -m manishrs5235@gmail.com
+
+          # Set up automatic certificate renewal
+          echo "0 0,12 * * * root certbot renew --quiet" | sudo tee /etc/cron.d/certbot
