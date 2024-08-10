@@ -44,15 +44,7 @@ jobs:
           # Run the new container
           sudo docker run -d --name web-app -p 3005:4000 techmanish2004/cicdwork:latest
 
-          # Install Nginx if not already installed
-          if ! command -v nginx &> /dev/null
-          then
-            sudo apt update
-            sudo apt install -y nginx
-          fi
-
-          # Create or update the Nginx configuration
-          sudo tee /etc/nginx/sites-available/default > /dev/null <<EOL
+          
           server {
               listen 80;
               server_name money-front-one.vercel.app;
@@ -70,19 +62,4 @@ jobs:
                   auth_basic_user_file /etc/nginx/.htpasswd;
               }
           }
-          EOL
-
-          # Restart Nginx to apply the new configuration
-          sudo systemctl restart nginx
-
-          # Obtain SSL certificates using Certbot (Let's Encrypt)
-          if ! command -v certbot &> /dev/null
-          then
-            sudo apt install -y certbot python3-certbot-nginx
-          fi
-
-          # Configure SSL with Certbot
-          sudo certbot --nginx -d money-front-one.vercel.app --non-interactive --agree-tos -m manishrs5235@gmail.com
-
-          # Set up automatic certificate renewal
-          echo "0 0,12 * * * root certbot renew --quiet" | sudo tee /etc/cron.d/certbot
+          
