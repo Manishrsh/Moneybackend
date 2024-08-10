@@ -51,7 +51,7 @@ jobs:
             sudo docker stop cicdwork || true
             sudo docker rm cicdwork || true
             # Run the new container
-            sudo docker run -d --name cicdwork -p 4000:4000 techmanish2004/cicdwork:latest
+            sudo docker run -d --name cicdwork -p 4001:4000 techmanish2004/cicdwork:latest
 
             # Install Nginx if not installed
             if ! command -v nginx &> /dev/null
@@ -66,7 +66,7 @@ jobs:
                 listen 80;
 
                 location / {
-                    proxy_pass http://localhost:4000;
+                    proxy_pass http://localhost:4001;
                     proxy_set_header Host \$host;
                     proxy_set_header X-Real-IP \$remote_addr;
                     proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
