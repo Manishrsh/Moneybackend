@@ -55,7 +55,7 @@ jobs:
           sudo tee /etc/nginx/sites-available/default > /dev/null <<EOL
           server {
               listen 80;
-              server_name userapp.100xdevs.com;
+              server_name money-front-one.vercel.app;
 
               location / {
                   proxy_pass http://localhost:3005;
@@ -82,7 +82,7 @@ jobs:
           fi
 
           # Configure SSL with Certbot
-          sudo certbot --nginx -d userapp.100xdevs.com --non-interactive --agree-tos -m your-email@example.com
+          sudo certbot --nginx -d money-front-one.vercel.app --non-interactive --agree-tos -m manishrs5235@gmail.com
 
           # Set up automatic certificate renewal
           echo "0 0,12 * * * root certbot renew --quiet" | sudo tee /etc/cron.d/certbot
