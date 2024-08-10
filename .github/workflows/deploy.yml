@@ -8,22 +8,20 @@ on:
 
 jobs:
   deploy:
-    name: Deploy to EC2 on main branch push
+    name: Deploy to EC2 on master branch push
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout the files
         uses: actions/checkout@v2
 
-      - name: Deploy to Server
+      - name: Deploy to Server 1
         uses: easingthemes/ssh-deploy@main
         env:
           SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
           REMOTE_HOST: ${{ secrets.HOST_DNS }}
           REMOTE_USER: ${{ secrets.USERNAME }}
           TARGET: ${{ secrets.TARGET_DIR }}
-        with:
-          args: "./Moneybackend" # Ensure this is correct and matches your source directory
 
       - name: Executing remote ssh commands using ssh key
         uses: appleboy/ssh-action@master
@@ -36,9 +34,5 @@ jobs:
             sudo apt-get install -y apache2
             sudo systemctl start apache2
             sudo systemctl enable apache2
-            # Navigate to the uploaded directory
-            cd ${{ secrets.TARGET_DIR }}
-            # List files to confirm they are present
-            ls -la
-            # Move all files from the target directory to /var/www/html
-            sudo mv ./* /var/www/html
+            cd Moneybackend
+            sudo mv * /var/www/html
