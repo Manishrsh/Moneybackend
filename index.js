@@ -119,7 +119,7 @@ app.get('/expencedata', async (req, res) => {
       }
     ]);
 
-    let previousBalance = 0;
+    let previousBalance = 1500;
     const result = expenceDetails.map((item) => {
       const newBalance = previousBalance + item.totalAddMoney - item.totalExpence;
       const newItem = {
