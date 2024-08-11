@@ -39,4 +39,4 @@ jobs:
           sudo docker pull techmanish2004/cicdwork:latest
           sudo docker stop cicdwork || true
           sudo docker rm cicdwork || true
-          sudo docker run -d --name web-app -p 3005:4000 techmanish2004/cicdwork:latest
+          sudo docker run -d --name cicdwork -p 3005:4000 techmanish2004/cicdwork:latest
