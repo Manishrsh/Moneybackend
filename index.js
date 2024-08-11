@@ -21,7 +21,7 @@ mongoose.connect(dbURI, {
 app.use(express.json());
 
 app.get('/', (req, res) => {
-  res.send("hello Money World cicd manish is done !!!!! only manish yes only");
+  res.send("hello Money World cicd manish is done !!!!! only manish yes only add url");
 });
 
 // Date formatting function
