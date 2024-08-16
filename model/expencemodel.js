@@ -10,8 +10,9 @@ const ExpenceSchema = new mongoose.Schema({
         required: true,
     },
     createdAt: {
-        type: String,
-        required: true,
+          type: Date,
+          default: Date.now, // Automatically sets the current date and time
+        // You can use this field to store dates in ISO format
       }
    
 });
