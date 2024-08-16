@@ -77,13 +77,11 @@ app.post('/addmoney', async (req, res) => {
 });
 
 app.get('/expencedata', async (req, res) => {
-  try {
+ try {
     const expenceDetails = await Expence.aggregate([
       {
         $group: {
-          _id: {
-            $dateToString: { format: "%Y-%m-%d", date: { $toDate: "$createdAt" } } // Convert to date and format as a string
-          },
+          _id: "$createdAt",
           totalExpence: { $sum: { $toInt: "$amount" } }
         }
       },
@@ -91,9 +89,7 @@ app.get('/expencedata', async (req, res) => {
         $lookup: {
           from: "addmoneys", // Adjust the collection name as necessary
           localField: "_id",
-          foreignField: {
-            $dateToString: { format: "%Y-%m-%d", date: { $toDate: "$createdAt" } } // Match the formatted date
-          },
+          foreignField: "createdAt",
           as: "addmoney"
         }
       },
@@ -111,7 +107,7 @@ app.get('/expencedata', async (req, res) => {
         }
       },
       {
-        $sort: { _id: 1 } // Sort by the full date
+        $sort: { _id: 1 } // Sort by date
       },
       {
         $project: {
@@ -122,7 +118,7 @@ app.get('/expencedata', async (req, res) => {
         }
       }
     ]);
-  
+
     let previousBalance = 1500;
     const result = expenceDetails.map((item) => {
       const newBalance = previousBalance + item.totalAddMoney - item.totalExpence;
@@ -136,9 +132,9 @@ app.get('/expencedata', async (req, res) => {
       previousBalance = newBalance;
       return newItem;
     });
-  
+
     res.status(200).send(result);
-  } catch (error) {
+  }  catch (error) {
     res.status(500).send({ error: error.message });
   } 
 });
