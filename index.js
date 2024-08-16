@@ -78,65 +78,66 @@ app.post('/addmoney', async (req, res) => {
 
 app.get('/expencedata', async (req, res) => {
  try {
-    const expenceDetails = await Expence.aggregate([
-      {
-        $group: {
-          _id: "$createdAt",
-          totalExpence: { $sum: { $toInt: "$amount" } }
-        }
-      },
-      {
-        $lookup: {
-          from: "addmoneys", // Adjust the collection name as necessary
-          localField: "_id",
-          foreignField: "createdAt",
-          as: "addmoney"
-        }
-      },
-      {
-        $unwind: {
-          path: "$addmoney",
-          preserveNullAndEmptyArrays: true
-        }
-      },
-      {
-        $group: {
-          _id: "$_id",
-          totalExpence: { $first: "$totalExpence" },
-          totalAddMoney: { $sum: { $toInt: "$addmoney.amount" } }
-        }
-      },
-      {
-        $sort: { _id: 1 } // Sort by date
-      },
-      {
-        $project: {
-          _id: 0,
-          date: "$_id",
-          totalExpence: 1,
-          totalAddMoney: 1
-        }
+  const expenceDetails = await Expence.aggregate([
+    {
+      $group: {
+        _id: "$createdAt", // Group by date
+        totalExpence: { $sum: { $toInt: "$amount" } } // Sum expenses, converting amount to integer
       }
-    ]);
+    },
+    {
+      $lookup: {
+        from: "addmoneys", // The name of the collection to join with
+        localField: "_id", // Field from the current collection (grouped date)
+        foreignField: "createdAt", // Field from the foreign collection
+        as: "addmoney" // Name of the new field to add the results
+      }
+    },
+    {
+      $unwind: {
+        path: "$addmoney", // Deconstruct the array to output a document for each element
+        preserveNullAndEmptyArrays: true // Keep documents with no matching entries
+      }
+    },
+    {
+      $group: {
+        _id: "$_id", // Re-group by date
+        totalExpence: { $first: "$totalExpence" }, // Get the total expense
+        totalAddMoney: { $sum: { $toInt: "$addmoney.amount" } } // Sum the add money amounts
+      }
+    },
+    {
+      $sort: { _id: 1 } // Sort by date in ascending order
+    },
+    {
+      $project: {
+        _id: 0, // Exclude _id from the output
+        date: "$_id", // Rename _id to date
+        totalExpence: 1,
+        totalAddMoney: 1
+      }
+    }
+  ]);
 
-    let previousBalance = 1500;
-    const result = expenceDetails.map((item) => {
-      const newBalance = previousBalance + item.totalAddMoney - item.totalExpence;
-      const newItem = {
-        date: item.date,
-        previousBalance,
-        totalExpence: item.totalExpence,
-        totalAddMoney: item.totalAddMoney,
-        newBalance
-      };
-      previousBalance = newBalance;
-      return newItem;
-    });
+  let previousBalance = 1500; // Starting balance
+  const result = expenceDetails.map((item) => {
+    const newBalance = previousBalance + item.totalAddMoney - item.totalExpence; // Calculate new balance
+    const newItem = {
+      date: item.date,
+      previousBalance,
+      totalExpence: item.totalExpence,
+      totalAddMoney: item.totalAddMoney,
+      newBalance
+    };
+    previousBalance = newBalance; // Update previous balance for next iteration
+    return newItem;
+  });
 
-    res.status(200).send(result);
-  }  catch (error) {
-    res.status(500).send({ error: error.message });
-  } 
+  res.status(200).send(result); // Send the final result to the client
+} catch (error) {
+  res.status(500).send({ error: 'An error occurred while processing your request.' });
+}
+
 });
     
 app.get('/expencedataall',async(req,res)=>{
