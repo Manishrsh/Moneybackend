@@ -81,7 +81,9 @@ app.get('/expencedata', async (req, res) => {
     const expenceDetails = await Expence.aggregate([
       {
         $group: {
-          _id: "$createdAt",
+          _id: {
+            $dateToString: { format: "%Y-%m-%d", date: { $toDate: "$createdAt" } } // Convert to date and format as a string
+          },
           totalExpence: { $sum: { $toInt: "$amount" } }
         }
       },
@@ -89,7 +91,9 @@ app.get('/expencedata', async (req, res) => {
         $lookup: {
           from: "addmoneys", // Adjust the collection name as necessary
           localField: "_id",
-          foreignField: "createdAt",
+          foreignField: {
+            $dateToString: { format: "%Y-%m-%d", date: { $toDate: "$createdAt" } } // Match the formatted date
+          },
           as: "addmoney"
         }
       },
@@ -107,7 +111,7 @@ app.get('/expencedata', async (req, res) => {
         }
       },
       {
-        $sort: { _id: 1 } // Sort by date
+        $sort: { _id: 1 } // Sort by the full date
       },
       {
         $project: {
@@ -118,7 +122,7 @@ app.get('/expencedata', async (req, res) => {
         }
       }
     ]);
-
+  
     let previousBalance = 1500;
     const result = expenceDetails.map((item) => {
       const newBalance = previousBalance + item.totalAddMoney - item.totalExpence;
@@ -132,12 +136,11 @@ app.get('/expencedata', async (req, res) => {
       previousBalance = newBalance;
       return newItem;
     });
-
+  
     res.status(200).send(result);
-  } catch (err) {
-    res.status(500).send(err);
-    console.error('Error retrieving expence data', err);
-  }
+  } catch (error) {
+    res.status(500).send({ error: error.message });
+  } 
 });
     
 app.get('/expencedataall',async(req,res)=>{
